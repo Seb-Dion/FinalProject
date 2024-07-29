@@ -4,3 +4,8 @@ project(FinalProject)
 set(CMAKE_CXX_STANDARD 17)
 
 add_executable(FinalProject main.cpp)
+
+
+# Add include directory
+include_directories(include)
+
