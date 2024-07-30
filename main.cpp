@@ -6,95 +6,177 @@
 #include <queue>
 #include <stack>
 #include <unordered_set>
-#include <chrono>
+#include <unordered_map>
 #include <SFML/Graphics.hpp>
-#include <SFML/Window/Keyboard.hpp>
 #include "include/json.hpp"
+
 using namespace std;
 using namespace sf;
-
 using json = nlohmann::json;
 
-void setText(Text &text, float x, float y){
+
+void setText(Text &text, float x, float y) {
     FloatRect textRect = text.getLocalBounds();
-    text.setOrigin(textRect.left + textRect.width/2.0f, textRect.top + textRect.height/2.0f);
+    text.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
     text.setPosition(Vector2f(x, y));
 }
 
-// Function to compare artists by familiarity
+
 bool compareByFamiliarity(const json& a, const json& b) {
     return a["familiarity"].get<double>() < b["familiarity"].get<double>();
 }
 
-// BFS function for artists
-void BFS(const vector<json>& artists) {
-    queue<json> q;
-    unordered_set<string> visited;
-    int count = 0;
-
-    if (!artists.empty()) {
-        q.push(artists[0]);
-        visited.insert(artists[0]["id"]);
+class Graph {
+private:
+    unordered_map<string, json> artists;
+    unordered_map<string, vector<string>> adjacencyList;
+public:
+    void addArtist(const string& id, const json& artist) {
+        artists[id] = artist;
+        adjacencyList[id] = vector<string>();
     }
 
-    while (!q.empty() && count < 5) {
-        json current = q.front();
-        q.pop();
+    void addEdge(const string& id1, const string& id2) {
+        adjacencyList[id1].push_back(id2);
+        adjacencyList[id2].push_back(id1);
+    }
 
-        if (current["familiarity"].get<double>() < 0.5) {
-            cout << "BFS Artist Name: " << current["name"] << endl;
-            count++;
-        }
+    vector<string> BFS(const string& startId) {
+        queue<string> q;
+        unordered_set<string> visited;
+        vector<string> bfsResults;
+        int count = 0;
 
-        for (const auto& artist : artists) {
-            if (visited.find(artist["id"]) == visited.end()) {
-                q.push(artist);
-                visited.insert(artist["id"]);
+        q.push(startId);
+        visited.insert(startId);
+
+        while (!q.empty() && count < 5) {
+            string currentId = q.front();
+            q.pop();
+            json currentArtist = artists[currentId];
+
+            if (currentArtist["familiarity"].get<double>() < 0.5) {
+                bfsResults.push_back(currentArtist["name"]);
+                count++;
+            }
+
+            for (const auto& neighborId : adjacencyList[currentId]) {
+                if (visited.find(neighborId) == visited.end()) {
+                    q.push(neighborId);
+                    visited.insert(neighborId);
+                }
             }
         }
-    }
-}
-
-// DFS function for artists
-void DFS(const vector<json>& artists) {
-    stack<json> s;
-    unordered_set<string> visited;
-    int count = 0;
-
-    if (!artists.empty()) {
-        s.push(artists[0]);
-        visited.insert(artists[0]["id"]);
+        return bfsResults;
     }
 
-    while (!s.empty() && count < 5) {
-        json current = s.top();
-        s.pop();
+    vector<string> DFS(const string& startId) {
+        stack<string> s;
+        unordered_set<string> visited;
+        vector<string> dfsResults;
+        int count = 0;
 
-        if (current["familiarity"].get<double>() < 0.5) {
-            cout << "DFS Artist Name: " << current["name"] << endl;
-            count++;
-        }
+        s.push(startId);
+        visited.insert(startId);
 
-        for (const auto& artist : artists) {
-            if (visited.find(artist["id"]) == visited.end()) {
-                s.push(artist);
-                visited.insert(artist["id"]);
+        while (!s.empty() && count < 5) {
+            string currentId = s.top();
+            s.pop();
+            json currentArtist = artists[currentId];
+
+            if (currentArtist["familiarity"].get<double>() < 0.5) {
+                dfsResults.push_back(currentArtist["name"]);
+                count++;
+            }
+
+            for (const auto& neighborId : adjacencyList[currentId]) {
+                if (visited.find(neighborId) == visited.end()) {
+                    s.push(neighborId);
+                    visited.insert(neighborId);
+                }
             }
         }
+        return dfsResults;
+    }
+
+    vector<string> getAllArtistIds() const {
+        vector<string> ids;
+        for (const auto& pair : artists) {
+            ids.push_back(pair.first);
+        }
+        return ids;
+    }
+};
+
+void displayRecommendations(const vector<string>& bfsResults, const vector<string>& dfsResults) {
+    Font font;
+    if (!font.loadFromFile("files/otherFont.ttf")) {
+        cerr << "Error loading font" << endl;
+        return;
+    }
+
+    RenderWindow recs(VideoMode(800, 600), "Recommendations", Style::Close);
+
+    while (recs.isOpen()) {
+        Event event;
+        while (recs.pollEvent(event)) {
+            if (event.type == Event::Closed) {
+                recs.close();
+            }
+        }
+
+        recs.clear(Color(98, 122, 157));
+
+        Text recTitle("Artist Recommendations", font, 40);
+        recTitle.setFillColor(Color::White);
+        setText(recTitle, 400, 50);
+        recs.draw(recTitle);
+
+        Text bfsTitle("BFS Results:", font, 30);
+        bfsTitle.setFillColor(Color::White);
+        bfsTitle.setStyle(Text::Underlined);
+        setText(bfsTitle, 200, 150);
+        recs.draw(bfsTitle);
+
+        int yBfs = 180;
+        int yDfs = 180;
+        for (const auto& name : bfsResults) {
+            Text artistName(name, font, 20);
+            artistName.setFillColor(Color::White);
+            setText(artistName, 200, yBfs);
+            recs.draw(artistName);
+            yBfs += 40;
+        }
+
+        Text dfsTitle("DFS Results:", font, 30);
+        dfsTitle.setStyle(Text::Underlined);
+        dfsTitle.setFillColor(Color::White);
+        setText(dfsTitle, 600, 150);
+        recs.draw(dfsTitle);
+
+        for (const auto& name : dfsResults) {
+            Text artistName(name, font, 20);
+            artistName.setFillColor(Color::White);
+            setText(artistName, 600, yDfs);
+            recs.draw(artistName);
+            yDfs += 40;
+        }
+
+        recs.display();
     }
 }
 
 int main() {
     bool isRunning = true;
+    vector<json> matchingArtists;
+    Graph graph;
 
-    // Load button texture
     Texture button;
     if (!button.loadFromFile("files/buttondepth.png")) {
         cerr << "Error loading button texture" << endl;
         return 1;
     }
 
-    // Create button sprites
     Sprite hipHopButton(button);
     hipHopButton.setPosition(100, 280);
     hipHopButton.setScale(0.50, 0.50);
@@ -119,14 +201,12 @@ int main() {
     countryButton.setPosition(500, 480);
     countryButton.setScale(0.5, 0.5);
 
-    // Create and load font
     Font font;
     if (!font.loadFromFile("files/otherFont.ttf")) {
         cerr << "Error loading font" << endl;
         return 1;
     }
 
-    // Create text elements
     Text title("A MUSICAL MYSTERY!", font, 50);
     title.setFillColor(Color::White);
     title.setStyle(Text::Bold);
@@ -167,44 +247,70 @@ int main() {
     country.setStyle(Text::Bold);
     setText(country, 595, 512);
 
-    // Create the welcome window
     RenderWindow welcome(VideoMode(800, 600), "Musical Mystery", Style::Close);
 
     while (isRunning) {
-        // Handle events in the welcome window
         while (welcome.isOpen()) {
             Event event;
             while (welcome.pollEvent(event)) {
                 if (event.type == Event::Closed) {
                     welcome.close();
-                    isRunning = false; // Set isRunning to false to exit the main loop
+                    isRunning = false;
                 }
 
                 if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
                     Vector2f mousePosition = welcome.mapPixelToCoords(Mouse::getPosition(welcome));
+                    string selectedGenre;
 
                     if (hipHopButton.getGlobalBounds().contains(mousePosition)) {
-                        welcome.close();
-                        RenderWindow recs(VideoMode(800, 600), "Recommendations", Style::Close);
+                        selectedGenre = "hip hop";
+                    } else if (folkRockButton.getGlobalBounds().contains(mousePosition)) {
+                        selectedGenre = "folk rock";
+                    } else if (popRockButton.getGlobalBounds().contains(mousePosition)) {
+                        selectedGenre = "pop rock";
+                    } else if (orchestraButton.getGlobalBounds().contains(mousePosition)) {
+                        selectedGenre = "orchestra";
+                    } else if (rAndBButton.getGlobalBounds().contains(mousePosition)) {
+                        selectedGenre = "r&b";
+                    } else if (countryButton.getGlobalBounds().contains(mousePosition)) {
+                        selectedGenre = "country";
+                    }
 
-                        // Handle events in the recommendations window
-                        while (recs.isOpen()) {
-                            Event event;
-                            while (recs.pollEvent(event)) {
-                                if (event.type == Event::Closed) {
-                                    recs.close();
-                                }
+                    if (!selectedGenre.empty()) {
+                        ifstream file("include/music.json");
+                        json jsonData;
+                        file >> jsonData;
+                        file.close();
+
+                        graph = Graph();
+                        unordered_set<string> seenArtists;
+
+                        for (const auto& item : jsonData) {
+                            string genre = item["artist"]["terms"].get<string>();
+                            string artistID = item["artist"]["id"];
+
+                            if (genre == selectedGenre && seenArtists.find(artistID) == seenArtists.end()) {
+                                graph.addArtist(artistID, item["artist"]);
+                                seenArtists.insert(artistID);
                             }
-
-                            recs.clear(Color(98, 122, 157));
-                            // Add drawing code for the new window here
-                            recs.display();
                         }
+
+                        vector<string> ids = graph.getAllArtistIds();
+                        for (size_t i = 0; i < ids.size(); ++i) {
+                            for (size_t j = i + 1; j < ids.size(); ++j) {
+                                graph.addEdge(ids[i], ids[j]);
+                            }
+                        }
+
+                        vector<string> bfsResults = graph.BFS(ids[0]);
+                        vector<string> dfsResults = graph.DFS(ids[0]);
+
+                        welcome.close();
+                        displayRecommendations(bfsResults, dfsResults);
                     }
                 }
             }
 
-            // Render the welcome window
             welcome.clear(Color(98, 122, 157));
             welcome.draw(title);
             welcome.draw(subtitle);
@@ -223,46 +329,6 @@ int main() {
             welcome.display();
         }
     }
-
-    /*string userGenre;
-    cout << "Hello! Welcome to a Musical Mystery" << endl;
-    cout << "Enter the genre of music you like: ";
-    getline(cin, userGenre);
-
-    // Open and read the JSON file
-    ifstream file("include/music.json");
-    if (!file.is_open()) {
-        cerr << "Unable to open file" << endl;
-        return 1;
-    }
-
-    json jsonData;
-    file >> jsonData;
-    file.close();
-
-    // Process the JSON data to find matching artists
-    vector<json> matchingArtists;
-    unordered_set<string> seenArtists;
-
-    for (const auto& item : jsonData) {
-        string genre = item["artist"]["terms"].get<string>();
-        string artistID = item["artist"]["id"];
-
-        // Check if the genre matches and the artist hasn't been added yet
-        if (genre == userGenre && seenArtists.find(artistID) == seenArtists.end()) {
-            matchingArtists.push_back(item["artist"]);
-            seenArtists.insert(artistID);
-        }
-    }
-
-    // Sort artists by familiarity (more unfamiliar first)
-    sort(matchingArtists.begin(), matchingArtists.end(), compareByFamiliarity);
-
-    // Output matching artists using BFS and DFS
-    cout << "BFS results:" << endl;
-    BFS(matchingArtists);
-    cout << "\nDFS results:" << endl;
-    DFS(matchingArtists);*/
 
     return 0;
 }
