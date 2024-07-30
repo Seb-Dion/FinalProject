@@ -8,6 +8,7 @@
 #include <unordered_set>
 #include <chrono>
 #include <SFML/Graphics.hpp>
+#include <SFML/Window/Keyboard.hpp>
 #include "include/json.hpp"
 using namespace std;
 using namespace sf;
@@ -84,32 +85,146 @@ void DFS(const vector<json>& artists) {
 }
 
 int main() {
-    // Prompt user for genre
-    RenderWindow welcome(VideoMode(800, 600), "Musical Mystery", Style::Close);
-    Font font;
-    font.loadFromFile("files/font.ttf");
+    bool isRunning = true;
 
-    Text title;
-    title.setFont(font);
-    title.setString("A MUSICAL MYSTERY!");
-    title.setCharacterSize(50);
-    title.setFillColor(Color::Black);
-    title.setStyle(Text::Bold);
-    title.setStyle(Text::Underlined);
-    setText(title, 800 / 2, (600 / 2) - 150);
-
-    while(welcome.isOpen()){
-        Event event;
-        while(welcome.pollEvent(event)){
-            if(event.type == Event::Closed)
-                welcome.close();
-        }
-        welcome.clear(Color::White);
-        welcome.draw(title);
-        welcome.display();
+    // Load button texture
+    Texture button;
+    if (!button.loadFromFile("files/buttondepth.png")) {
+        cerr << "Error loading button texture" << endl;
+        return 1;
     }
 
-    string userGenre;
+    // Create button sprites
+    Sprite hipHopButton(button);
+    hipHopButton.setPosition(100, 280);
+    hipHopButton.setScale(0.50, 0.50);
+
+    Sprite folkRockButton(button);
+    folkRockButton.setPosition(100, 380);
+    folkRockButton.setScale(0.50, 0.50);
+
+    Sprite popRockButton(button);
+    popRockButton.setPosition(100, 480);
+    popRockButton.setScale(0.50, 0.50);
+
+    Sprite orchestraButton(button);
+    orchestraButton.setPosition(500, 280);
+    orchestraButton.setScale(0.5, 0.5);
+
+    Sprite rAndBButton(button);
+    rAndBButton.setPosition(500, 380);
+    rAndBButton.setScale(0.5, 0.5);
+
+    Sprite countryButton(button);
+    countryButton.setPosition(500, 480);
+    countryButton.setScale(0.5, 0.5);
+
+    // Create and load font
+    Font font;
+    if (!font.loadFromFile("files/otherFont.ttf")) {
+        cerr << "Error loading font" << endl;
+        return 1;
+    }
+
+    // Create text elements
+    Text title("A MUSICAL MYSTERY!", font, 50);
+    title.setFillColor(Color::White);
+    title.setStyle(Text::Bold);
+    setText(title, 800 / 2, (600 / 2) - 175);
+
+    Text subtitle("Select a genre below for niche artist recommendations...", font, 18);
+    subtitle.setFillColor(Color::White);
+    subtitle.setStyle(Text::Bold);
+    setText(subtitle, 800 / 2, (600 / 2) - 75);
+
+    Text hipHop("Hip Hop", font, 15);
+    hipHop.setFillColor(Color::Black);
+    hipHop.setStyle(Text::Bold);
+    setText(hipHop, 195, 312);
+
+    Text folkRock("Folk Rock", font, 15);
+    folkRock.setFillColor(Color::Black);
+    folkRock.setStyle(Text::Bold);
+    setText(folkRock, 195, 412);
+
+    Text popRock("Pop Rock", font, 15);
+    popRock.setFillColor(Color::Black);
+    popRock.setStyle(Text::Bold);
+    setText(popRock, 195, 512);
+
+    Text orchestra("Orchestra", font, 15);
+    orchestra.setFillColor(Color::Black);
+    orchestra.setStyle(Text::Bold);
+    setText(orchestra, 595, 312);
+
+    Text rAndB("R&B", font, 15);
+    rAndB.setFillColor(Color::Black);
+    rAndB.setStyle(Text::Bold);
+    setText(rAndB, 595, 412);
+
+    Text country("Country", font, 15);
+    country.setFillColor(Color::Black);
+    country.setStyle(Text::Bold);
+    setText(country, 595, 512);
+
+    // Create the welcome window
+    RenderWindow welcome(VideoMode(800, 600), "Musical Mystery", Style::Close);
+
+    while (isRunning) {
+        // Handle events in the welcome window
+        while (welcome.isOpen()) {
+            Event event;
+            while (welcome.pollEvent(event)) {
+                if (event.type == Event::Closed) {
+                    welcome.close();
+                    isRunning = false; // Set isRunning to false to exit the main loop
+                }
+
+                if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
+                    Vector2f mousePosition = welcome.mapPixelToCoords(Mouse::getPosition(welcome));
+
+                    if (hipHopButton.getGlobalBounds().contains(mousePosition)) {
+                        welcome.close();
+                        RenderWindow recs(VideoMode(800, 600), "Recommendations", Style::Close);
+
+                        // Handle events in the recommendations window
+                        while (recs.isOpen()) {
+                            Event event;
+                            while (recs.pollEvent(event)) {
+                                if (event.type == Event::Closed) {
+                                    recs.close();
+                                }
+                            }
+
+                            recs.clear(Color(98, 122, 157));
+                            // Add drawing code for the new window here
+                            recs.display();
+                        }
+                    }
+                }
+            }
+
+            // Render the welcome window
+            welcome.clear(Color(98, 122, 157));
+            welcome.draw(title);
+            welcome.draw(subtitle);
+            welcome.draw(hipHopButton);
+            welcome.draw(hipHop);
+            welcome.draw(folkRockButton);
+            welcome.draw(folkRock);
+            welcome.draw(popRockButton);
+            welcome.draw(popRock);
+            welcome.draw(orchestraButton);
+            welcome.draw(orchestra);
+            welcome.draw(rAndBButton);
+            welcome.draw(rAndB);
+            welcome.draw(countryButton);
+            welcome.draw(country);
+            welcome.display();
+        }
+    }
+
+    /*string userGenre;
     cout << "Hello! Welcome to a Musical Mystery" << endl;
     cout << "Enter the genre of music you like: ";
     getline(cin, userGenre);
@@ -147,7 +262,7 @@ int main() {
     cout << "BFS results:" << endl;
     BFS(matchingArtists);
     cout << "\nDFS results:" << endl;
-    DFS(matchingArtists);
+    DFS(matchingArtists);*/
 
     return 0;
 }

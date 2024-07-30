@@ -199,6 +199,21 @@ CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 //Value Computed by CMake
 CMAKE_PROJECT_NAME:STATIC=FinalProject
 
+//Value Computed by CMake
+CMAKE_PROJECT_VERSION:STATIC=0.4.0
+
+//Value Computed by CMake
+CMAKE_PROJECT_VERSION_MAJOR:STATIC=0
+
+//Value Computed by CMake
+CMAKE_PROJECT_VERSION_MINOR:STATIC=4
+
+//Value Computed by CMake
+CMAKE_PROJECT_VERSION_PATCH:STATIC=0
+
+//Value Computed by CMake
+CMAKE_PROJECT_VERSION_TWEAK:STATIC=
+
 //Path to a program.
 CMAKE_RANLIB:FILEPATH=/Library/Developer/CommandLineTools/usr/bin/ranlib
 
@@ -263,6 +278,9 @@ CMAKE_TAPI:FILEPATH=/Library/Developer/CommandLineTools/usr/bin/tapi
 // during the make.  This is useful for debugging only. With Visual
 // Studio IDE projects all commands are done without /nologo.
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
+
+//Path to a library.
+COREFOUNDATION_LIBRARY:FILEPATH=/Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk/System/Library/Frameworks/CoreFoundation.framework
 
 //Enable to build OSX bundles
 CPACK_BINARY_BUNDLE:BOOL=OFF
@@ -396,6 +414,30 @@ OPENGL_gl_LIBRARY:FILEPATH=/Library/Developer/CommandLineTools/SDKs/MacOSX14.4.s
 OPENGL_glu_LIBRARY:FILEPATH=/Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk/System/Library/Frameworks/OpenGL.framework
 
 //Value Computed by CMake
+SFGUI_BINARY_DIR:STATIC=/Users/sebastiandion/CLionProjects/FinalProject/cmake-build-debug
+
+//Generate API documentation.
+SFGUI_BUILD_DOC:BOOL=OFF
+
+//Build examples.
+SFGUI_BUILD_EXAMPLES:BOOL=ON
+
+//Build shared library.
+SFGUI_BUILD_SHARED_LIBS:BOOL=ON
+
+//Include default font in library (DejaVuSans).
+SFGUI_INCLUDE_FONT:BOOL=ON
+
+//Value Computed by CMake
+SFGUI_IS_TOP_LEVEL:STATIC=ON
+
+//Dependencies for the target
+SFGUI_LIB_DEPENDS:STATIC=general;sfml-graphics;general;sfml-window;general;sfml-system;general;/Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk/System/Library/Frameworks/OpenGL.framework;general;/Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk/System/Library/Frameworks/CoreFoundation.framework;
+
+//Value Computed by CMake
+SFGUI_SOURCE_DIR:STATIC=/Users/sebastiandion/CLionProjects/FinalProject
+
+//Value Computed by CMake
 SFML_BINARY_DIR:STATIC=/Users/sebastiandion/CLionProjects/FinalProject/cmake-build-debug/_deps/sfml-build
 
 //TRUE to build SFML's Audio module.
@@ -448,6 +490,9 @@ SFML_OPENGL_ES:BOOL=0
 
 //Value Computed by CMake
 SFML_SOURCE_DIR:STATIC=/Users/sebastiandion/CLionProjects/FinalProject/cmake-build-debug/_deps/sfml-src
+
+//Do you want to link SFML statically?
+SFML_STATIC_LIBRARIES:BOOL=OFF
 
 //TRUE to use system dependencies, FALSE to use the bundled ones.
 SFML_USE_SYSTEM_DEPS:BOOL=FALSE
