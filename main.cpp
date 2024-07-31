@@ -7,6 +7,7 @@
 #include <stack>
 #include <unordered_set>
 #include <unordered_map>
+#include <random>
 #include <SFML/Graphics.hpp>
 #include "include/json.hpp"
 
@@ -24,6 +25,7 @@ class Graph {
 private:
     unordered_map<string, json> artists;
     unordered_map<string, vector<string>> adjacencyList;
+
 public:
     void addArtist(const string& id, const json& artist) {
         artists[id] = artist;
@@ -54,7 +56,12 @@ public:
                 count++;
             }
 
-            for (const auto& neighborId : adjacencyList[currentId]) {
+            vector<string> neighbors = adjacencyList[currentId];
+            random_device rd;
+            mt19937 g(rd());
+            shuffle(neighbors.begin(), neighbors.end(), g);
+
+            for (const auto& neighborId : neighbors) {
                 if (visited.find(neighborId) == visited.end()) {
                     q.push(neighborId);
                     visited.insert(neighborId);
@@ -83,7 +90,12 @@ public:
                 count++;
             }
 
-            for (const auto& neighborId : adjacencyList[currentId]) {
+            vector<string> neighbors = adjacencyList[currentId];
+            random_device rd;
+            mt19937 g(rd());
+            shuffle(neighbors.begin(), neighbors.end(), g);
+
+            for (const auto& neighborId : neighbors) {
                 if (visited.find(neighborId) == visited.end()) {
                     s.push(neighborId);
                     visited.insert(neighborId);
@@ -177,7 +189,6 @@ void displayRecommendations(const vector<string>& bfsResults, const vector<strin
 int main() {
     bool isRunning = true;
     bool goBackToHome = false;
-    vector<json> matchingArtists;
     Graph graph;
 
     Texture button;
@@ -213,7 +224,7 @@ int main() {
         return 1;
     }
 
-    Text title("A MUSICAL MYSTERY!", font, 50);
+    Text title("UNDERGROUND ARTISTS", font, 50);
     title.setFillColor(Color::White);
     title.setStyle(Text::Bold);
     setText(title, 800 / 2, (600 / 2) - 175);
