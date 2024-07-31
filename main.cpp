@@ -14,16 +14,10 @@ using namespace std;
 using namespace sf;
 using json = nlohmann::json;
 
-
 void setText(Text &text, float x, float y) {
     FloatRect textRect = text.getLocalBounds();
     text.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
     text.setPosition(Vector2f(x, y));
-}
-
-
-bool compareByFamiliarity(const json& a, const json& b) {
-    return a["familiarity"].get<double>() < b["familiarity"].get<double>();
 }
 
 class Graph {
@@ -108,7 +102,7 @@ public:
     }
 };
 
-void displayRecommendations(const vector<string>& bfsResults, const vector<string>& dfsResults) {
+void displayRecommendations(const vector<string>& bfsResults, const vector<string>& dfsResults, bool &goBackToHome) {
     Font font;
     if (!font.loadFromFile("files/otherFont.ttf")) {
         cerr << "Error loading font" << endl;
@@ -117,15 +111,29 @@ void displayRecommendations(const vector<string>& bfsResults, const vector<strin
 
     RenderWindow recs(VideoMode(800, 600), "Recommendations", Style::Close);
 
+    Texture home;
+    home.loadFromFile("files/home.png");
+
+    Sprite homeButton(home);
+    homeButton.setPosition(25, 525);
+
     while (recs.isOpen()) {
         Event event;
         while (recs.pollEvent(event)) {
             if (event.type == Event::Closed) {
                 recs.close();
+            } else if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
+                Vector2f mousePosition = recs.mapPixelToCoords(Mouse::getPosition(recs));
+                if (homeButton.getGlobalBounds().contains(mousePosition)) {
+                    goBackToHome = true;
+                    recs.close();
+                }
             }
         }
 
         recs.clear(Color(98, 122, 157));
+
+        recs.draw(homeButton);
 
         Text recTitle("Artist Recommendations", font, 40);
         recTitle.setFillColor(Color::White);
@@ -168,14 +176,12 @@ void displayRecommendations(const vector<string>& bfsResults, const vector<strin
 
 int main() {
     bool isRunning = true;
+    bool goBackToHome = false;
     vector<json> matchingArtists;
     Graph graph;
 
     Texture button;
-    if (!button.loadFromFile("files/buttondepth.png")) {
-        cerr << "Error loading button texture" << endl;
-        return 1;
-    }
+    button.loadFromFile("files/buttondepth.png");
 
     Sprite hipHopButton(button);
     hipHopButton.setPosition(100, 280);
@@ -306,7 +312,7 @@ int main() {
                         vector<string> dfsResults = graph.DFS(ids[0]);
 
                         welcome.close();
-                        displayRecommendations(bfsResults, dfsResults);
+                        displayRecommendations(bfsResults, dfsResults, goBackToHome);
                     }
                 }
             }
@@ -327,6 +333,11 @@ int main() {
             welcome.draw(countryButton);
             welcome.draw(country);
             welcome.display();
+        }
+
+        if (goBackToHome) {
+            goBackToHome = false;
+            welcome.create(VideoMode(800, 600), "Musical Mystery", Style::Close);
         }
     }
 
