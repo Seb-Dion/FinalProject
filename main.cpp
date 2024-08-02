@@ -7,7 +7,6 @@
 #include <stack>
 #include <unordered_set>
 #include <unordered_map>
-#include <random>
 #include <SFML/Graphics.hpp>
 #include "include/json.hpp"
 
@@ -57,9 +56,6 @@ public:
             }
 
             vector<string> neighbors = adjacencyList[currentId];
-            random_device rd;
-            mt19937 g(rd());
-            shuffle(neighbors.begin(), neighbors.end(), g);
 
             for (const auto& neighborId : neighbors) {
                 if (visited.find(neighborId) == visited.end()) {
@@ -91,9 +87,6 @@ public:
             }
 
             vector<string> neighbors = adjacencyList[currentId];
-            random_device rd;
-            mt19937 g(rd());
-            shuffle(neighbors.begin(), neighbors.end(), g);
 
             for (const auto& neighborId : neighbors) {
                 if (visited.find(neighborId) == visited.end()) {
@@ -114,7 +107,7 @@ public:
     }
 };
 
-void displayRecommendations(const vector<string>& bfsResults, const vector<string>& dfsResults, bool &goBackToHome) {
+void displayRecommendations(const vector<string>& bfsResults, const vector<string>& dfsResults, double bfsTime, double dfsTime, bool &goBackToHome) {
     Font font;
     if (!font.loadFromFile("files/otherFont.ttf")) {
         cerr << "Error loading font" << endl;
@@ -122,6 +115,16 @@ void displayRecommendations(const vector<string>& bfsResults, const vector<strin
     }
 
     RenderWindow recs(VideoMode(800, 600), "Recommendations", Style::Close);
+
+    float borderThickness = 15.0f;
+    Color borderColor = sf::Color::Black;
+
+    RectangleShape border;
+    border.setSize(sf::Vector2f(recs.getSize().x - 2 * borderThickness, recs.getSize().y - 2 * borderThickness));
+    border.setFillColor(sf::Color::Transparent); // No fill, only outline
+    border.setOutlineThickness(borderThickness);
+    border.setOutlineColor(borderColor);
+    border.setPosition(borderThickness, borderThickness);
 
     Texture home;
     home.loadFromFile("files/home.png");
@@ -146,6 +149,7 @@ void displayRecommendations(const vector<string>& bfsResults, const vector<strin
         recs.clear(Color(98, 122, 157));
 
         recs.draw(homeButton);
+        recs.draw(border);
 
         Text recTitle("Artist Recommendations", font, 40);
         recTitle.setFillColor(Color::White);
@@ -182,6 +186,17 @@ void displayRecommendations(const vector<string>& bfsResults, const vector<strin
             yDfs += 40;
         }
 
+        // Display time taken for BFS and DFS
+        Text bfsTimeText("BFS Time: " + to_string(bfsTime) + " ms", font, 20);
+        bfsTimeText.setFillColor(Color::White);
+        setText(bfsTimeText, 200, yBfs + 20);
+        recs.draw(bfsTimeText);
+
+        Text dfsTimeText("DFS Time: " + to_string(dfsTime) + " ms", font, 20);
+        dfsTimeText.setFillColor(Color::White);
+        setText(dfsTimeText, 600, yDfs + 20);
+        recs.draw(dfsTimeText);
+
         recs.display();
     }
 }
@@ -193,6 +208,13 @@ int main() {
 
     Texture button;
     button.loadFromFile("files/buttondepth.png");
+
+    Texture musicNote;
+    musicNote.loadFromFile("files/mus.png");
+
+    Sprite musicalNote(musicNote);
+    musicalNote.setPosition(50, 50);
+    musicalNote.setScale(0.05,0.05);
 
     Sprite hipHopButton(button);
     hipHopButton.setPosition(100, 280);
@@ -228,6 +250,7 @@ int main() {
     title.setFillColor(Color::White);
     title.setStyle(Text::Bold);
     setText(title, 800 / 2, (600 / 2) - 175);
+    float animationSpeed = 0.5f;
 
     Text subtitle("Select a genre below for niche artist recommendations...", font, 18);
     subtitle.setFillColor(Color::White);
@@ -265,6 +288,18 @@ int main() {
     setText(country, 595, 512);
 
     RenderWindow welcome(VideoMode(800, 600), "Musical Mystery", Style::Close);
+
+    welcome.setFramerateLimit(60);
+
+    float borderThickness = 15.0f;
+    Color borderColor = sf::Color::Black;
+
+    RectangleShape border;
+    border.setSize(sf::Vector2f(welcome.getSize().x - 2 * borderThickness, welcome.getSize().y - 2 * borderThickness));
+    border.setFillColor(sf::Color::Transparent); // No fill, only outline
+    border.setOutlineThickness(borderThickness);
+    border.setOutlineColor(borderColor);
+    border.setPosition(borderThickness, borderThickness);
 
     while (isRunning) {
         while (welcome.isOpen()) {
@@ -319,18 +354,29 @@ int main() {
                             }
                         }
 
+                        // Measure BFS time
+                        auto startBfs = chrono::high_resolution_clock::now();
                         vector<string> bfsResults = graph.BFS(ids[0]);
+                        auto endBfs = chrono::high_resolution_clock::now();
+                        double bfsTime = chrono::duration<double, milli>(endBfs - startBfs).count();
+
+                        // Measure DFS time
+                        auto startDfs = chrono::high_resolution_clock::now();
                         vector<string> dfsResults = graph.DFS(ids[0]);
+                        auto endDfs = chrono::high_resolution_clock::now();
+                        double dfsTime = chrono::duration<double, milli>(endDfs - startDfs).count();
 
                         welcome.close();
-                        displayRecommendations(bfsResults, dfsResults, goBackToHome);
+                        displayRecommendations(bfsResults, dfsResults, bfsTime, dfsTime, goBackToHome);
                     }
                 }
             }
 
             welcome.clear(Color(98, 122, 157));
+            welcome.draw(border);
             welcome.draw(title);
             welcome.draw(subtitle);
+            welcome.draw(musicalNote);
             welcome.draw(hipHopButton);
             welcome.draw(hipHop);
             welcome.draw(folkRockButton);
@@ -354,3 +400,4 @@ int main() {
 
     return 0;
 }
+

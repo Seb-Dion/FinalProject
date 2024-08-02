@@ -25,12 +25,18 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a78a64a4-a052-4f12-a8a3-4e6a7e0266c4" name="Changes" comment="Added Home Button">
+    <list default="true" id="a78a64a4-a052-4f12-a8a3-4e6a7e0266c4" name="Changes" comment="Added randomizing artist feature">
+      <change afterPath="$PROJECT_DIR$/files/info_icon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/files/mus.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/files/musicc.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/files/notes.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/.ninja_deps" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/.ninja_deps" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/.ninja_log" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/.ninja_log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/FinalProject.dir/main.cpp.o" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/FinalProject.dir/main.cpp.o" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/FinalProject" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/FinalProject" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/Testing/Temporary/LastTest.log" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/Testing/Temporary/LastTest.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/music.json" beforeDir="false" afterPath="$PROJECT_DIR$/include/music.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/main.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -183,7 +189,8 @@
       <workItem from="1722374292054" duration="4789000" />
       <workItem from="1722389374448" duration="1280000" />
       <workItem from="1722390665660" duration="607000" />
-      <workItem from="1722435543548" duration="2854000" />
+      <workItem from="1722435543548" duration="10290000" />
+      <workItem from="1722617569470" duration="1000" />
     </task>
     <task id="LOCAL-00001" summary="Included JSON file">
       <option name="closed" value="true" />
@@ -241,7 +248,15 @@
       <option name="project" value="LOCAL" />
       <updated>1722390606073</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Added randomizing artist feature">
+      <option name="closed" value="true" />
+      <created>1722451388232</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1722451388232</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -260,6 +275,7 @@
     <MESSAGE value="Created Welcome window" />
     <MESSAGE value="Updated Graph structure" />
     <MESSAGE value="Added Home Button" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added Home Button" />
+    <MESSAGE value="Added randomizing artist feature" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added randomizing artist feature" />
   </component>
 </project>
