@@ -1,4 +1,3 @@
-#include <iostream>
 #include <fstream>
 #include <vector>
 #include <string>
@@ -14,28 +13,34 @@ using namespace std;
 using namespace sf;
 using json = nlohmann::json;
 
+//Helper function for positioning text.
 void setText(Text &text, float x, float y) {
     FloatRect textRect = text.getLocalBounds();
     text.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
     text.setPosition(Vector2f(x, y));
 }
 
+//Class for creating artist graph.
 class Graph {
 private:
+    //map for storing artists and their IDs...graph in the form of an adjacency list.
     unordered_map<string, json> artists;
     unordered_map<string, vector<string>> adjacencyList;
 
 public:
+    //adds artist nodes to the graph.
     void addArtist(const string& id, const json& artist) {
         artists[id] = artist;
         adjacencyList[id] = vector<string>();
     }
 
+    //creates an edge between artists.
     void addEdge(const string& id1, const string& id2) {
         adjacencyList[id1].push_back(id2);
         adjacencyList[id2].push_back(id1);
     }
 
+    //main breadth-first traversal function...takes in the starting node and returns recommended artists.
     vector<string> BFS(const string& startId) {
         queue<string> q;
         unordered_set<string> visited;
@@ -45,11 +50,13 @@ public:
         q.push(startId);
         visited.insert(startId);
 
+        //Only gives at most 5 recommended artists.
         while (!q.empty() && count < 5) {
             string currentId = q.front();
             q.pop();
             json currentArtist = artists[currentId];
 
+            //makes sure to only give niche artists with less than 0.5 familiarity score.
             if (currentArtist["familiarity"].get<double>() < 0.5) {
                 bfsResults.push_back(currentArtist["name"]);
                 count++;
@@ -67,6 +74,7 @@ public:
         return bfsResults;
     }
 
+    //main depth-first traversal function with same input and output as BFS.
     vector<string> DFS(const string& startId) {
         stack<string> s;
         unordered_set<string> visited;
@@ -98,8 +106,10 @@ public:
         return dfsResults;
     }
 
-    vector<string> getAllArtistIds() const {
+    //getter function that returns a vector of all artists' IDs in the graph.
+    [[nodiscard]] vector<string> getIDs() const {
         vector<string> ids;
+        ids.reserve(artists.size());
         for (const auto& pair : artists) {
             ids.push_back(pair.first);
         }
@@ -107,33 +117,57 @@ public:
     }
 };
 
-void displayRecommendations(const vector<string>& bfsResults, const vector<string>& dfsResults, double bfsTime, double dfsTime, bool &goBackToHome) {
-    Font font;
-    if (!font.loadFromFile("files/otherFont.ttf")) {
-        cerr << "Error loading font" << endl;
-        return;
-    }
 
+//Creates the recommendations window and all properties.
+//Takes in artist recs and time comparisons.
+void displayRecommendations(const vector<string>& bfsResults, const vector<string>& dfsResults, double bfsTime, double dfsTime, bool &goBackToHome) {
+    //sets font.
+    Font font;
+    font.loadFromFile("files/otherFont.ttf");
+
+    //Opens window.
     RenderWindow recs(VideoMode(800, 600), "Recommendations", Style::Close);
 
+    //creates border outline.
     float borderThickness = 15.0f;
     Color borderColor = sf::Color::Black;
 
     RectangleShape border;
     border.setSize(sf::Vector2f(recs.getSize().x - 2 * borderThickness, recs.getSize().y - 2 * borderThickness));
-    border.setFillColor(sf::Color::Transparent); // No fill, only outline
+    border.setFillColor(sf::Color::Transparent);
     border.setOutlineThickness(borderThickness);
     border.setOutlineColor(borderColor);
     border.setPosition(borderThickness, borderThickness);
 
+    //home button to return back to welcome window.
     Texture home;
     home.loadFromFile("files/home.png");
 
     Sprite homeButton(home);
     homeButton.setPosition(25, 525);
 
+    //box outlines properties.
+    float resultsBoxWidth = 350;
+    float resultsBoxHeight = 400;
+    float resultsBoxY = 120;
+
+    RectangleShape bfsResultsBox;
+    bfsResultsBox.setSize(Vector2f(resultsBoxWidth, resultsBoxHeight));
+    bfsResultsBox.setFillColor(Color(80, 80, 80, 100));
+    bfsResultsBox.setOutlineThickness(2);
+    bfsResultsBox.setOutlineColor(Color::White);
+    bfsResultsBox.setPosition(50, resultsBoxY);
+
+    RectangleShape dfsResultsBox;
+    dfsResultsBox.setSize(Vector2f(resultsBoxWidth, resultsBoxHeight));
+    dfsResultsBox.setFillColor(Color(80, 80, 80, 100));
+    dfsResultsBox.setOutlineThickness(2);
+    dfsResultsBox.setOutlineColor(Color::White);
+    dfsResultsBox.setPosition(400, resultsBoxY);
+
+    //handles events of clicking the home button and closing the window.
     while (recs.isOpen()) {
-        Event event;
+        Event event{};
         while (recs.pollEvent(event)) {
             if (event.type == Event::Closed) {
                 recs.close();
@@ -146,28 +180,31 @@ void displayRecommendations(const vector<string>& bfsResults, const vector<strin
             }
         }
 
+        //clearing and drawing window.
         recs.clear(Color(98, 122, 157));
-
         recs.draw(homeButton);
         recs.draw(border);
+        recs.draw(bfsResultsBox);
+        recs.draw(dfsResultsBox);
 
+        //Creating window text.
         Text recTitle("Artist Recommendations", font, 40);
         recTitle.setFillColor(Color::White);
-        setText(recTitle, 400, 50);
+        setText(recTitle, 400, 65);
         recs.draw(recTitle);
 
         Text bfsTitle("BFS Results:", font, 30);
         bfsTitle.setFillColor(Color::White);
         bfsTitle.setStyle(Text::Underlined);
-        setText(bfsTitle, 200, 150);
+        setText(bfsTitle, 225, resultsBoxY + 20);
         recs.draw(bfsTitle);
 
-        int yBfs = 180;
-        int yDfs = 180;
+        //Creates text for each artist in the BFS vector.
+        float yBfs = resultsBoxY + 75;
         for (const auto& name : bfsResults) {
             Text artistName(name, font, 20);
             artistName.setFillColor(Color::White);
-            setText(artistName, 200, yBfs);
+            setText(artistName, 225, yBfs);
             recs.draw(artistName);
             yBfs += 40;
         }
@@ -175,37 +212,53 @@ void displayRecommendations(const vector<string>& bfsResults, const vector<strin
         Text dfsTitle("DFS Results:", font, 30);
         dfsTitle.setStyle(Text::Underlined);
         dfsTitle.setFillColor(Color::White);
-        setText(dfsTitle, 600, 150);
+        setText(dfsTitle, 575, resultsBoxY + 20);
         recs.draw(dfsTitle);
 
+        float yDfs = resultsBoxY + 75;
         for (const auto& name : dfsResults) {
             Text artistName(name, font, 20);
             artistName.setFillColor(Color::White);
-            setText(artistName, 600, yDfs);
+            setText(artistName, 575, yDfs);
             recs.draw(artistName);
             yDfs += 40;
         }
 
-        // Display time taken for BFS and DFS
+        //Displays traversal execution times.
         Text bfsTimeText("BFS Time: " + to_string(bfsTime) + " ms", font, 20);
-        bfsTimeText.setFillColor(Color::White);
-        setText(bfsTimeText, 200, yBfs + 20);
+        Text dfsTimeText("DFS Time: " + to_string(dfsTime) + " ms", font, 20);
+        auto lightRed = Color(255,127,127);
+        auto lightGreen = Color(144,238,144);
+
+        //Sets the faster time to green and the slower time to red.
+        if (bfsTime < dfsTime) {
+            bfsTimeText.setFillColor(lightGreen);
+            dfsTimeText.setFillColor(lightRed);
+        } else {
+            bfsTimeText.setFillColor(lightRed);
+            dfsTimeText.setFillColor(lightGreen);
+        }
+
+        setText(bfsTimeText, 225, yBfs + 20);
         recs.draw(bfsTimeText);
 
-        Text dfsTimeText("DFS Time: " + to_string(dfsTime) + " ms", font, 20);
-        dfsTimeText.setFillColor(Color::White);
-        setText(dfsTimeText, 600, yDfs + 20);
+        setText(dfsTimeText, 575, yDfs + 20);
         recs.draw(dfsTimeText);
 
         recs.display();
     }
 }
 
+
+
+//main function.
 int main() {
+    //Creates graph and conditionals.
     bool isRunning = true;
     bool goBackToHome = false;
     Graph graph;
 
+    //Loading various textures and creating sprites.
     Texture button;
     button.loadFromFile("files/buttondepth.png");
 
@@ -241,21 +294,17 @@ int main() {
     countryButton.setScale(0.5, 0.5);
 
     Font font;
-    if (!font.loadFromFile("files/otherFont.ttf")) {
-        cerr << "Error loading font" << endl;
-        return 1;
-    }
+    font.loadFromFile("files/otherFont.ttf");
 
     Text title("UNDERGROUND ARTISTS", font, 50);
     title.setFillColor(Color::White);
     title.setStyle(Text::Bold);
-    setText(title, 800 / 2, (600 / 2) - 175);
-    float animationSpeed = 0.5f;
+    setText(title, 400, (300) - 175);
 
     Text subtitle("Select a genre below for niche artist recommendations...", font, 18);
     subtitle.setFillColor(Color::White);
     subtitle.setStyle(Text::Bold);
-    setText(subtitle, 800 / 2, (600 / 2) - 75);
+    setText(subtitle, 400, 225);
 
     Text hipHop("Hip Hop", font, 15);
     hipHop.setFillColor(Color::Black);
@@ -291,25 +340,28 @@ int main() {
 
     welcome.setFramerateLimit(60);
 
+    //Creates black border around window.
     float borderThickness = 15.0f;
     Color borderColor = sf::Color::Black;
 
     RectangleShape border;
     border.setSize(sf::Vector2f(welcome.getSize().x - 2 * borderThickness, welcome.getSize().y - 2 * borderThickness));
-    border.setFillColor(sf::Color::Transparent); // No fill, only outline
+    border.setFillColor(sf::Color::Transparent);
     border.setOutlineThickness(borderThickness);
     border.setOutlineColor(borderColor);
     border.setPosition(borderThickness, borderThickness);
 
+    //Main welcome window loop.
     while (isRunning) {
         while (welcome.isOpen()) {
-            Event event;
+            Event event{};
             while (welcome.pollEvent(event)) {
                 if (event.type == Event::Closed) {
                     welcome.close();
                     isRunning = false;
                 }
 
+                //Handles genre button events and assigns the selected genre.
                 if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
                     Vector2f mousePosition = welcome.mapPixelToCoords(Mouse::getPosition(welcome));
                     string selectedGenre;
@@ -329,14 +381,17 @@ int main() {
                     }
 
                     if (!selectedGenre.empty()) {
+                        //Parsing data set.
                         ifstream file("include/music.json");
                         json jsonData;
                         file >> jsonData;
                         file.close();
 
+                        //Set of unique artists.
                         graph = Graph();
                         unordered_set<string> seenArtists;
 
+                        //Adds artist to graph if it has the selected genre (terms) and is unique.
                         for (const auto& item : jsonData) {
                             string genre = item["artist"]["terms"].get<string>();
                             string artistID = item["artist"]["id"];
@@ -347,20 +402,20 @@ int main() {
                             }
                         }
 
-                        vector<string> ids = graph.getAllArtistIds();
+                        //Adding edges.
+                        vector<string> ids = graph.getIDs();
                         for (size_t i = 0; i < ids.size(); ++i) {
                             for (size_t j = i + 1; j < ids.size(); ++j) {
                                 graph.addEdge(ids[i], ids[j]);
                             }
                         }
 
-                        // Measure BFS time
+                        //Getting traversal times.
                         auto startBfs = chrono::high_resolution_clock::now();
                         vector<string> bfsResults = graph.BFS(ids[0]);
                         auto endBfs = chrono::high_resolution_clock::now();
                         double bfsTime = chrono::duration<double, milli>(endBfs - startBfs).count();
 
-                        // Measure DFS time
                         auto startDfs = chrono::high_resolution_clock::now();
                         vector<string> dfsResults = graph.DFS(ids[0]);
                         auto endDfs = chrono::high_resolution_clock::now();
@@ -372,6 +427,7 @@ int main() {
                 }
             }
 
+            //Displaying and drawing.
             welcome.clear(Color(98, 122, 157));
             welcome.draw(border);
             welcome.draw(title);
@@ -392,6 +448,7 @@ int main() {
             welcome.display();
         }
 
+        //Handles home button.
         if (goBackToHome) {
             goBackToHome = false;
             welcome.create(VideoMode(800, 600), "Musical Mystery", Style::Close);
