@@ -121,7 +121,7 @@ void displayRecommendations(const vector<string>& bfsResults, const vector<strin
 
     RectangleShape border;
     border.setSize(sf::Vector2f(recs.getSize().x - 2 * borderThickness, recs.getSize().y - 2 * borderThickness));
-    border.setFillColor(sf::Color::Transparent); // No fill, only outline
+    border.setFillColor(sf::Color::Transparent);
     border.setOutlineThickness(borderThickness);
     border.setOutlineColor(borderColor);
     border.setPosition(borderThickness, borderThickness);
@@ -131,6 +131,29 @@ void displayRecommendations(const vector<string>& bfsResults, const vector<strin
 
     Sprite homeButton(home);
     homeButton.setPosition(25, 525);
+
+    RectangleShape header;
+    header.setSize(Vector2f(recs.getSize().x - 2 * borderThickness, 100));
+    header.setFillColor(Color::Black);
+    header.setPosition(borderThickness, borderThickness);
+
+    float resultsBoxWidth = 350;
+    float resultsBoxHeight = 400;
+    float resultsBoxY = 120;
+
+    RectangleShape bfsResultsBox;
+    bfsResultsBox.setSize(Vector2f(resultsBoxWidth, resultsBoxHeight));
+    bfsResultsBox.setFillColor(Color(80, 80, 80, 100));
+    bfsResultsBox.setOutlineThickness(2);
+    bfsResultsBox.setOutlineColor(Color::White);
+    bfsResultsBox.setPosition(50, resultsBoxY);
+
+    RectangleShape dfsResultsBox;
+    dfsResultsBox.setSize(Vector2f(resultsBoxWidth, resultsBoxHeight));
+    dfsResultsBox.setFillColor(Color(80, 80, 80, 100));
+    dfsResultsBox.setOutlineThickness(2);
+    dfsResultsBox.setOutlineColor(Color::White);
+    dfsResultsBox.setPosition(400, resultsBoxY);
 
     while (recs.isOpen()) {
         Event event;
@@ -150,24 +173,25 @@ void displayRecommendations(const vector<string>& bfsResults, const vector<strin
 
         recs.draw(homeButton);
         recs.draw(border);
+        recs.draw(bfsResultsBox);
+        recs.draw(dfsResultsBox);
 
         Text recTitle("Artist Recommendations", font, 40);
         recTitle.setFillColor(Color::White);
-        setText(recTitle, 400, 50);
+        setText(recTitle, 400, 65);
         recs.draw(recTitle);
 
         Text bfsTitle("BFS Results:", font, 30);
         bfsTitle.setFillColor(Color::White);
         bfsTitle.setStyle(Text::Underlined);
-        setText(bfsTitle, 200, 150);
+        setText(bfsTitle, 225, resultsBoxY + 20);
         recs.draw(bfsTitle);
 
-        int yBfs = 180;
-        int yDfs = 180;
+        int yBfs = resultsBoxY + 75;
         for (const auto& name : bfsResults) {
             Text artistName(name, font, 20);
             artistName.setFillColor(Color::White);
-            setText(artistName, 200, yBfs);
+            setText(artistName, 225, yBfs);
             recs.draw(artistName);
             yBfs += 40;
         }
@@ -175,31 +199,43 @@ void displayRecommendations(const vector<string>& bfsResults, const vector<strin
         Text dfsTitle("DFS Results:", font, 30);
         dfsTitle.setStyle(Text::Underlined);
         dfsTitle.setFillColor(Color::White);
-        setText(dfsTitle, 600, 150);
+        setText(dfsTitle, 575, resultsBoxY + 20);
         recs.draw(dfsTitle);
 
+        int yDfs = resultsBoxY + 75;
         for (const auto& name : dfsResults) {
             Text artistName(name, font, 20);
             artistName.setFillColor(Color::White);
-            setText(artistName, 600, yDfs);
+            setText(artistName, 575, yDfs);
             recs.draw(artistName);
             yDfs += 40;
         }
 
-        // Display time taken for BFS and DFS
         Text bfsTimeText("BFS Time: " + to_string(bfsTime) + " ms", font, 20);
-        bfsTimeText.setFillColor(Color::White);
-        setText(bfsTimeText, 200, yBfs + 20);
+        Text dfsTimeText("DFS Time: " + to_string(dfsTime) + " ms", font, 20);
+        auto lightRed = Color(255,127,127);
+        auto lightGreen = Color(144,238,144);
+
+        if (bfsTime < dfsTime) {
+            bfsTimeText.setFillColor(lightGreen);
+            dfsTimeText.setFillColor(lightRed);
+        } else {
+            bfsTimeText.setFillColor(lightRed);
+            dfsTimeText.setFillColor(lightGreen);
+        }
+
+        setText(bfsTimeText, 225, yBfs + 20);
         recs.draw(bfsTimeText);
 
-        Text dfsTimeText("DFS Time: " + to_string(dfsTime) + " ms", font, 20);
-        dfsTimeText.setFillColor(Color::White);
-        setText(dfsTimeText, 600, yDfs + 20);
+        setText(dfsTimeText, 575, yDfs + 20);
         recs.draw(dfsTimeText);
 
         recs.display();
     }
 }
+
+
+
 
 int main() {
     bool isRunning = true;
@@ -296,7 +332,7 @@ int main() {
 
     RectangleShape border;
     border.setSize(sf::Vector2f(welcome.getSize().x - 2 * borderThickness, welcome.getSize().y - 2 * borderThickness));
-    border.setFillColor(sf::Color::Transparent); // No fill, only outline
+    border.setFillColor(sf::Color::Transparent);
     border.setOutlineThickness(borderThickness);
     border.setOutlineColor(borderColor);
     border.setPosition(borderThickness, borderThickness);
@@ -354,13 +390,11 @@ int main() {
                             }
                         }
 
-                        // Measure BFS time
                         auto startBfs = chrono::high_resolution_clock::now();
                         vector<string> bfsResults = graph.BFS(ids[0]);
                         auto endBfs = chrono::high_resolution_clock::now();
                         double bfsTime = chrono::duration<double, milli>(endBfs - startBfs).count();
 
-                        // Measure DFS time
                         auto startDfs = chrono::high_resolution_clock::now();
                         vector<string> dfsResults = graph.DFS(ids[0]);
                         auto endDfs = chrono::high_resolution_clock::now();
