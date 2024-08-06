@@ -36,3 +36,11 @@
 
 5. **Display Results**: These recommendations are then displayed on a new window which also shows the differences between the two algorithms mentioned above.
 
+## How to use
+
+1. **Requirements**: This project requires SFML (2.5.1 or later) and is best used on CLion, with Cmake (3.10 minimum).
+
+2. **Setup**: Begin with cloning this repository.
+   - Open CLion and click on **Get from VCS**.
+   - Choose **Git** as the VCS and enter the repo URL: https://github.com/SebbyDubs/FinalProject
+   - 
