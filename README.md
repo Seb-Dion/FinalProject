@@ -20,10 +20,10 @@
 
 ## How It Works
 
-1. **Data Loading**: The application reads artist data from a JSON file (`music.json`). Each artist entry includes information such as the artist's name, genre, and familiarity score.
+1. **Data Loading**: The application reads artist data from a JSON file (`updated_music.json`). This file includes 100,000 musical artists and songs, but only the artists are used for this project. Each artist entry includes information such as the artist's name, genre, and familiarity score. 10,000 of these artists are real and the other 90,000 are randomly generated. 
 
 2. **Graph Construction**: 
-   - **Nodes**: Each artist is added as a node in the graph.
+   - **Nodes**: The program reads through the entire dataset and adds artists to the graph who have less than a 0.5 familiarity score.
    - **Edges**: Connections between artists are established based on shared genres or other criteria.
 
 3. **User Interaction**:
@@ -34,18 +34,5 @@
    - **BFS and DFS Algorithms**: The application utilizes BFS and DFS to traverse the graph and recommend up to five niche artists with a familiarity score of less than 0.5.
    - **Performance Comparison**: The execution times for BFS and DFS are displayed, with the faster time highlighted in green and the slower in red.
 
-5. **Display Results**: A separate window shows the recommended artists along with the traversal execution times.
+5. **Display Results**: These recommendations are then displayed on a new window which also shows the differences between the two algorithms mentioned above.
 
-## Getting Started
-
-### Prerequisites
-
-- C++ Compiler (supporting C++11 or later)
-- SFML library
-- nlohmann/json library
-
-### Installation
-
-1. Clone the repository:
-   ```sh
-   git clone https://github.com/your-repository-url/underground-artists.git
