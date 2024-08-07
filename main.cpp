@@ -336,7 +336,7 @@ int main() {
     country.setStyle(Text::Bold);
     setText(country, 595, 512);
 
-    RenderWindow welcome(VideoMode(800, 600), "Musical Mystery", Style::Close);
+    RenderWindow welcome(VideoMode(800, 600), "Underground Artists", Style::Close);
 
     welcome.setFramerateLimit(60);
 
@@ -382,7 +382,7 @@ int main() {
 
                     if (!selectedGenre.empty()) {
                         //Parsing data set.
-                        ifstream file("include/music.json");
+                        ifstream file("include/updated_music.json");
                         json jsonData;
                         file >> jsonData;
                         file.close();
