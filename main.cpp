@@ -451,7 +451,7 @@ int main() {
         //Handles home button.
         if (goBackToHome) {
             goBackToHome = false;
-            welcome.create(VideoMode(800, 600), "Musical Mystery", Style::Close);
+            welcome.create(VideoMode(800, 600), "Underground Artists", Style::Close);
         }
     }
 
