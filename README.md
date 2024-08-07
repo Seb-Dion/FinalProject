@@ -43,4 +43,17 @@
 2. **Setup**: Begin with cloning this repository.
    - Open CLion and click on **Get from VCS**.
    - Choose **Git** as the VCS and enter the repo URL: https://github.com/SebbyDubs/FinalProject
-   - 
+   - Clone the project in whichever directory you desire.
+3. **Building the Program**
+   - When the project opens in CLion, you may be met with errors, which can be easily fixed.
+   - To fix these, make sure you update the **CMakeLists.txt** by replacing everywhere it says "FinalProject" with whatever you named your directory (naming the directory FinalProject is recommended). Once this is done, reload the changes.
+   - If errors are still occuring, make sure to clear the cache. This can be done by running `rm -rf /Path/To/Your/Directory/cmake-build-debug` on your terminal, or just simply deleting the `cmake-build-debug` directory on your program.
+   - Once this is complete, `build` your project on CLion and make sure the working directory is correct by editing the configuration of your program.
+   - All of this should ensure that the project is properly loaded onto CLion and then just click `run`!
+4. **Running the Program**
+   - When the project starts running, the user will be met with a welcome window that introduces them to the project and prompts them to choose from six popular musical genres.
+   - When a genre is chosen, the window will switch to the artist recommendations page, where ten total artists are given. Five of them will be given by the BFS traversal and the other five by the DFS traversal. It is possible for there to be overlap between the artists each algorithm recommends, of course.
+   - As mentioned above, artists given are determined to be 'niche' due to their familiarity being below 0.5. Familiarity is a `double` value attached to the artist which ranges from 0.0 to 1.0, with 1.0 being very familiar and 0.0 being very unknown.
+   - The time to execution is also given for both algorithms to further allow for comparison between the two traversals.
+   - **Note**: Since we had to generate 90,000 random artists to increase the dataset, most of the artist names may appear in the form of `Artist 04d3ae7f` or something similar to this. Even though it doesn't necessarily give recognizable names, the program still works as expected and will work exactly the same with a dataset of all real artists.
+     
