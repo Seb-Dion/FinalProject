@@ -42,7 +42,7 @@
 
 2. **Setup**: Begin with cloning this repository.
    - Open CLion and click on **Get from VCS**.
-   - Choose **Git** as the VCS and enter the repo URL: https://github.com/SebbyDubs/FinalProject
+   - Choose **Git** as the VCS and enter the repo URL: https://github.com/Seb-Dion/FinalProject
    - Clone the project in whichever directory you desire.
 3. **Building the Program**
    - When the project opens in CLion, you may be met with errors, which can be easily fixed.
